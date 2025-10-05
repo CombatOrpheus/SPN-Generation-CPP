@@ -1,45 +1,31 @@
-#include "PetriNet.hpp"
+#include "PetriNet.h"
 
-PetriNet::PetriNet(int places, int transitions)
-    : places_(places), transitions_(transitions) {
-    matrix_.resize(places, std::vector<int>(2 * transitions + 1, 0));
+PetriNet::PetriNet(const Eigen::MatrixXi& matrix) : petri_matrix_(matrix) {}
+
+const Eigen::MatrixXi& PetriNet::getMatrix() const {
+    return petri_matrix_;
 }
 
-int PetriNet::get_places() const {
-    return places_;
+Eigen::MatrixXi PetriNet::getPreConditionMatrix() const {
+    return petri_matrix_.leftCols(getNumTransitions());
 }
 
-int PetriNet::get_transitions() const {
-    return transitions_;
+Eigen::MatrixXi PetriNet::getPostConditionMatrix() const {
+    return petri_matrix_.block(0, getNumTransitions(), getNumPlaces(), getNumTransitions());
 }
 
-const std::vector<std::vector<int>>& PetriNet::get_matrix() const {
-    return matrix_;
+Eigen::MatrixXi PetriNet::getChangeMatrix() const {
+    return getPostConditionMatrix() - getPreConditionMatrix();
 }
 
-void PetriNet::set_marking(int place, int tokens) {
-    if (place >= 0 && place < places_) {
-        matrix_[place][2 * transitions_] = tokens;
-    }
+Eigen::VectorXi PetriNet::getInitialMarking() const {
+    return petri_matrix_.rightCols(1);
 }
 
-void PetriNet::set_pre(int place, int transition, int weight) {
-    if (place >= 0 && place < places_ && transition >= 0 && transition < transitions_) {
-        matrix_[place][transition] = weight;
-    }
+int PetriNet::getNumPlaces() const {
+    return petri_matrix_.rows();
 }
 
-void PetriNet::set_post(int place, int transition, int weight) {
-    if (place >= 0 && place < places_ && transition >= 0 && transition < transitions_) {
-        matrix_[place][transitions_ + transition] = weight;
-    }
-}
-
-void PetriNet::print() const {
-    for (const auto& row : matrix_) {
-        for (int val : row) {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
-    }
+int PetriNet::getNumTransitions() const {
+    return (petri_matrix_.cols() - 1) / 2;
 }
