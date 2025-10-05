@@ -1,41 +1,19 @@
-# Prerequisites
-*.d
+# Build artifacts
+build/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Googletest build files
+googletest/build/
+googletest/lib/
+googletest/CTestTestfile.cmake
+googletest/cmake_install.cmake
+googletest/Makefile
 
-# Precompiled Headers
-*.gch
-*.pch
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
 
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
+# Other
 *.out
-*.app
-
-# debug information files
-*.dwo
+*.so
+*.a
