@@ -27,10 +27,6 @@ FetchContent_MakeAvailable(googletest)
 # --- Source files ---
 set(APP_SOURCES
     src/main.cpp
-    src/PetriNet.cpp
-    src/ReachabilityGraph.cpp
-    src/SPNAnalysis.cpp
-    src/GraphGenerator.cpp
 )
 
 set(LIB_SOURCES
@@ -45,11 +41,11 @@ set(TEST_SOURCES
     tests/test_PetriNet.cpp
     tests/test_ReachabilityGraph.cpp
     tests/test_SPNAnalysis.cpp
-    tests/test_GraphGenerator.cpp
+    tests/test_Integration.cpp
 )
 
 # --- Main Application ---
-add_executable(spn_app ${APP_SOURCES})
+add_executable(spn_app ${APP_SOURCES} ${LIB_SOURCES})
 target_include_directories(spn_app PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${eigen_SOURCE_DIR}

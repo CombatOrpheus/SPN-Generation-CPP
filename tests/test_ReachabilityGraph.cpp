@@ -1,37 +1,49 @@
 #include "gtest/gtest.h"
-#include "ReachabilityGraph.hpp"
+#include "PetriNet.h"
+#include "ReachabilityGraph.h"
 
-TEST(ReachabilityGraphTest, Constructor) {
-    ReachabilityGraph graph;
-    EXPECT_EQ(graph.get_vertices().size(), 0);
-    EXPECT_EQ(graph.get_edges().size(), 0);
-    EXPECT_EQ(graph.get_arc_transitions().size(), 0);
+TEST(ReachabilityGraphTest, GenerateBoundedGraph) {
+    // A simple Petri Net: P0 -> T0 -> P1
+    // Initial marking: [1, 0]
+    Eigen::MatrixXi matrix(2, 5);
+    matrix << 1, 0, 0, 1, 1,
+              0, 1, 1, 0, 0;
+    PetriNet net(matrix);
+
+    ReachabilityGraph graph = ReachabilityGraph::generate(net);
+
+    ASSERT_TRUE(graph.isBounded());
+    ASSERT_EQ(graph.getVertices().size(), 2);
+    ASSERT_EQ(graph.getEdges().size(), 2);
+
+    // Vertices (Markings)
+    Eigen::VectorXi marking0(2);
+    marking0 << 1, 0;
+    Eigen::VectorXi marking1(2);
+    marking1 << 0, 1;
+    ASSERT_EQ(graph.getVertices()[0], marking0);
+    ASSERT_EQ(graph.getVertices()[1], marking1);
+
+    // Edges
+    const auto& edges = graph.getEdges();
+    // Edge 0: M0 -> M1 via T0
+    ASSERT_EQ(edges[0].from_vertex_idx, 0);
+    ASSERT_EQ(edges[0].to_vertex_idx, 1);
+    ASSERT_EQ(edges[0].transition_idx, 0);
+    // Edge 1: M1 -> M0 via T1
+    ASSERT_EQ(edges[1].from_vertex_idx, 1);
+    ASSERT_EQ(edges[1].to_vertex_idx, 0);
+    ASSERT_EQ(edges[1].transition_idx, 1);
 }
 
-TEST(ReachabilityGraphTest, AddVertex) {
-    ReachabilityGraph graph;
-    graph.add_vertex({1, 0, 0});
-    graph.add_vertex({0, 1, 0});
+TEST(ReachabilityGraphTest, GenerateUnboundedGraph) {
+    // An unbounded Petri Net: T0 -> P0
+    // Initial marking: [1]
+    Eigen::MatrixXi matrix(1, 3);
+    matrix << 0, 1, 1;
+    PetriNet net(matrix);
 
-    const auto& vertices = graph.get_vertices();
-    ASSERT_EQ(vertices.size(), 2);
-    EXPECT_EQ(vertices[0], std::vector<int>({1, 0, 0}));
-    EXPECT_EQ(vertices[1], std::vector<int>({0, 1, 0}));
-}
+    ReachabilityGraph graph = ReachabilityGraph::generate(net, 5, 10); // place_upper_limit=5
 
-TEST(ReachabilityGraphTest, AddEdge) {
-    ReachabilityGraph graph;
-    graph.add_edge(0, 1, 0);
-    graph.add_edge(1, 2, 1);
-
-    const auto& edges = graph.get_edges();
-    const auto& transitions = graph.get_arc_transitions();
-
-    ASSERT_EQ(edges.size(), 2);
-    EXPECT_EQ(edges[0], std::make_pair(0, 1));
-    EXPECT_EQ(edges[1], std::make_pair(1, 2));
-
-    ASSERT_EQ(transitions.size(), 2);
-    EXPECT_EQ(transitions[0], 0);
-    EXPECT_EQ(transitions[1], 1);
+    ASSERT_FALSE(graph.isBounded());
 }
